@@ -152,3 +152,264 @@ This example demonstrates:
 ## Author
 
 Basic LangGraph workflow example for learning graph-based AI application development.
+
+
+# LangGraph Job Application Screening Workflow
+
+This project demonstrates a simple **job application screening workflow** using **LangGraph** and a typed state.
+
+## Overview
+
+The workflow simulates a basic hiring process:
+
+1. **Receive Application**
+
+   * Accepts applicant details.
+   * Displays submitted information.
+
+2. **Screen Resume**
+
+   * Evaluates the applicant's experience.
+   * Selects candidates with more than 2 years of experience.
+   * Rejects candidates with 2 years or less experience.
+
+3. **Send Decision**
+
+   * Displays the final hiring decision.
+
+## Workflow Diagram
+
+```text
+Receive Application
+        │
+        ▼
+   Screen Resume
+        │
+        ▼
+   Send Decision
+```
+
+## State Definition
+
+```python
+class JobApplicationState(TypedDict):
+    name: str
+    role: str
+    experience: int
+    decision: str
+```
+
+### State Fields
+
+| Field      | Type | Description           |
+| ---------- | ---- | --------------------- |
+| name       | str  | Applicant's name      |
+| role       | str  | Job role applied for  |
+| experience | int  | Years of experience   |
+| decision   | str  | Final hiring decision |
+
+---
+
+## Node 1: Receive Application
+
+```python
+def receive_application(state: JobApplicationState):
+    print(f"Applicant : {state['name']}")
+    print(f"Role      : {state['role']}")
+    print(f"Experience: {state['experience']} years")
+    return {}
+```
+
+### Purpose
+
+* Receives applicant details.
+* Displays submitted information.
+* Passes the state to the next node.
+
+---
+
+## Node 2: Screen Resume
+
+```python
+def screen_resume(state: JobApplicationState):
+
+    if state["experience"] > 2:
+        return {"decision": "Selected"}
+
+    return {"decision": "Rejected"}
+```
+
+### Screening Rule
+
+| Experience           | Decision |
+| -------------------- | -------- |
+| Greater than 2 years | Selected |
+| 2 years or less      | Rejected |
+
+---
+
+## Node 3: Send Decision
+
+```python
+def send_decision(state: JobApplicationState):
+    print(f"{state['name']} : {state['decision']}")
+    return {}
+```
+
+### Purpose
+
+* Displays the final result.
+* Marks the workflow as complete.
+
+---
+
+## Building the Graph
+
+```python
+builder = StateGraph(JobApplicationState)
+
+builder.add_node("receive_application", receive_application)
+builder.add_node("screen_resume", screen_resume)
+builder.add_node("send_decision", send_decision)
+
+builder.set_entry_point("receive_application")
+
+builder.add_edge("receive_application", "screen_resume")
+builder.add_edge("screen_resume", "send_decision")
+
+builder.set_finish_point("send_decision")
+
+graph = builder.compile()
+```
+
+### Graph Flow
+
+```text
+receive_application
+          │
+          ▼
+    screen_resume
+          │
+          ▼
+     send_decision
+```
+
+---
+
+## Executing the Workflow
+
+```python
+result = graph.invoke(
+    {
+        "name": "Yash",
+        "role": "Python Developer",
+        "experience": 3,
+        "decision": ""
+    }
+)
+```
+
+---
+
+## Sample Output
+
+```text
+===== Receiving Application =====
+Applicant : Yash
+Role      : Python Developer
+Experience: 3 years
+
+===== Screening Resume =====
+Resume Passed Screening
+
+===== Final Decision =====
+Yash : Selected
+
+===== Final State =====
+{
+    'name': 'Yash',
+    'role': 'Python Developer',
+    'experience': 3,
+    'decision': 'Selected'
+}
+```
+
+---
+
+## Example Scenarios
+
+### Candidate Selected
+
+```python
+{
+    "name": "Yash",
+    "role": "Python Developer",
+    "experience": 5
+}
+```
+
+Output:
+
+```text
+Selected
+```
+
+### Candidate Rejected
+
+```python
+{
+    "name": "John",
+    "role": "Python Developer",
+    "experience": 1
+}
+```
+
+Output:
+
+```text
+Rejected
+```
+
+---
+
+## Installation
+
+Install LangGraph:
+
+```bash
+pip install langgraph
+```
+
+---
+
+## Learning Objectives
+
+This project demonstrates:
+
+* Creating a typed state using `TypedDict`
+* Building a multi-step workflow with LangGraph
+* Passing state between nodes
+* Updating state dynamically
+* Implementing business logic inside graph nodes
+* Executing sequential workflows
+* Simulating a real-world hiring process
+
+---
+
+## Future Enhancements
+
+Possible improvements include:
+
+* Multiple screening criteria
+* Interview scheduling node
+* Skill assessment node
+* HR approval workflow
+* Email notification integration
+* Conditional routing using LangGraph edges
+
+---
+
+## Author
+
+A beginner-friendly LangGraph example that simulates an automated job application screening system.
+

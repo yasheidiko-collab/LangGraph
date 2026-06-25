@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+langgraph
+langgraph-checkpoint-postgres
+langchain
+langchain-groq
+langfuse
+python-dotenv
+tenacity
+psycopg[binary]
